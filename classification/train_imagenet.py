@@ -6,6 +6,7 @@ import torch.distributed as dist
 import torch
 import torch.nn as nn
 import torch.backends.cudnn as cudnn
+import torchvision.datasets as datasets
 from torch.utils.data.distributed import DistributedSampler
 import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
@@ -89,25 +90,40 @@ def main():
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                      std=[0.229, 0.224, 0.225])
 
-    train_dataset = ImagenetDataset(
-        args.train_root,
-        args.train_source,
+    train_dataset = datasets.ImageFolder(args.train_root, transform =
         transforms.Compose([
             transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             ColorAugmentation(),
             normalize,
-        ]))
-    val_dataset = ImagenetDataset(
-        args.val_root,
-        args.val_source,
-        transforms.Compose([
+        ])
+    )
+    # train_dataset = ImagenetDataset(
+    #     args.train_root,
+    #     args.train_source,
+    #     transforms.Compose([
+    #         transforms.RandomResizedCrop(224),
+    #         transforms.RandomHorizontalFlip(),
+    #         transforms.ToTensor(),
+    #         ColorAugmentation(),
+    #         normalize,
+    #     ]))
+
+    val_dataset = datasets.ImageFolder(args.val_root, 
+        transform = transforms.Compose([
             transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
         ]))
+    # val_dataset = ImagenetDataset(args.val_root, args.val_source,
+    #     transform = transforms.Compose([
+    #         transforms.Resize(256),
+    #         transforms.CenterCrop(224),
+    #         transforms.ToTensor(),
+    #         normalize,
+    #     ]))
 
     train_sampler = DistributedSampler(train_dataset)
     val_sampler = DistributedSampler(val_dataset)

@@ -30,4 +30,4 @@ TRAIN:
 
 
 TEST:
-    checkpoint_path : /data1/vchua/nm-sparsity/data/pretrained_model/
+    checkpoint_path : /home/vchua/may08-nncf1.7/NM-sparsity/zoo/resnet50(2_4).pth
