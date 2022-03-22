@@ -36,6 +36,7 @@ parser.add_argument('--model_dir', type=str)
 parser.add_argument('--resume_from', default='', help='resume_from')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
+parser.add_argument("--sparsity-commit", default=False, dest='tozero', action="store_true")
 args = parser.parse_args()
 
 def main():
@@ -43,7 +44,7 @@ def main():
     args = parser.parse_args()
 
     with open(args.config) as f:
-        config = yaml.load(f)
+        config = yaml.safe_load(f)
 
     for key in config:
         for k, v in config[key].items():
@@ -80,6 +81,36 @@ def main():
         load_state_ckpt(args.checkpoint_path, model)
     else:
         best_prec1, start_epoch = load_state(model_dir, model, optimizer=optimizer)
+
+    if args.tozero is True:
+        import numpy as np
+        def calc_sparsity(tensor):
+            if isinstance(tensor, torch.Tensor):
+                rate = 1-(tensor.count_nonzero()/tensor.numel())
+                return rate.item()
+            else:
+                rate = 1-(np.count_nonzero(tensor)/tensor.size)
+                return rate
+
+        with torch.no_grad():
+            for n, m in model.named_modules():
+                if hasattr(m, "weight") and 'Sparse' in m.__class__.__name__:
+                    zeroed_w = m.get_sparse_weights()
+                    sparsity = calc_sparsity(zeroed_w)
+                    # print("{:.3f} | {}".format(sparsity, n))
+
+                    pre_commit = calc_sparsity(m.weight)
+                    m.weight.data = zeroed_w
+                    post_commit = calc_sparsity(m.weight)
+                    print("{:.3f} -> {:.3f} | {}.weight".format(pre_commit, post_commit, n))
+                    
+        print("[Info]: Sparsity commited")
+        sparse_pth_list = list(os.path.splitext(args.checkpoint_path))
+        sparse_pth_list[-1] = ".zeroed" + sparse_pth_list[-1]
+        sparse_pth = ''.join(sparse_pth_list)
+        torch.save(model.state_dict(), sparse_pth)
+        exit()
+
     if args.rank == 0:
         writer = SummaryWriter(model_dir)
     else:
