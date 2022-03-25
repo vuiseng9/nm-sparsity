@@ -5,6 +5,36 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "[eval] onnx/ir",
+            "type": "python",
+            "request": "launch",
+            "env": {
+                "CUDA_VISIBLE_DEVICES": "",
+                "TORCH_DISTRIBUTED_DEBUG": "DETAIL",
+                "WANDB_MODE": "disabled",
+                "WANDB_PROJECT": "summarization",
+                "WANDB_WATCH": "false",
+            },
+            "cwd": "${workspaceFolder}/nncf/examples/torch/classification",
+            "program": "validate_onnx_ir.py",
+            "args": [
+                "-d", "CPU",
+                "-i", 
+                // "ILSVRC2012_val_00038135.JPEG",
+                "/nvme1/datasets/ilsvrc2012/torchvision/val",
+                "-m", 
+                // "/nvme1/vchua/run/sr-ste-zoo/rn50-2oo4-nncfptq/resnet50_imagenet_int8/2022-03-22__10-18-21/ir/resnet50_imagenet_int8.xml",
+                // "/nvme1/vchua/run/sr-ste-zoo/rn50-2oo4-nncfptq/resnet50_imagenet_int8/2022-03-22__10-18-21/ir/resnet50_imagenet_int8.nncf.onnx",
+                // "/nvme1/vchua/run/unstructured-rn50/rn50-80pc-sparse-8bit-20220323_210103/resnet50_imagenet_const_sparsity_int8/2022-03-23__21-01-06/ir/resnet50_imagenet_const_sparsity_int8.xml",
+                // "/nvme1/vchua/run/vchua-sparse-models/rn50-80pc-8bit/ir/resnet50_imagenet_const_sparsity_int8.nncf.onnx",
+                // "/nvme1/vchua/run/vchua-sparse-models/rn50-85pc-8bit/ir/resnet50_imagenet_const_sparsity_int8.nncf.onnx",
+                // "/nvme1/vchua/run/vchua-sparse-models/rn50-4oo8-8bit/ir/resnet50_imagenet_int8.nncf.onnx",
+                "/nvme1/vchua/run/vchua-sparse-models/rn50-2oo4-8bit/ir/resnet50_imagenet_int8.nncf.onnx",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": true
+        }
+        {
             "name": "[sketch]",
             "type": "python",
             "request": "launch",
